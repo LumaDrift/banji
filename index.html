@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f4f7f5"><meta name="description" content="班记：记上班、看排班、算工资。">
+<title>班记</title>
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="班记">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='16' fill='%2312805f'/%3E%3Ctext x='24' y='33' fill='%23fff' text-anchor='middle' font-size='29'%3E班%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="base.css?v=62be305706">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&amp;family=Noto+Sans+SC:wght@400;500;700&amp;display=swap">
+<link rel="stylesheet" href="theme-mint.css?v=62be305706">
+</head>
+<body>
+<div class="app is-home" lang="zh-CN">
+<p class="storage-alert" id="storage-alert" role="alert" hidden></p>
+<main>
+
+<section id="home" class="view home">
+  <div class="home-head">
+    <div class="home-hello"><p class="home-date" id="home-date"></p><p class="home-greet" id="home-greet"></p></div>
+    <button class="avatar-btn" data-open="profile" aria-label="头像和个人资料"><span class="avatar" id="home-avatar"></span></button>
+  </div>
+  <div class="setup-card" id="setup-card" hidden>
+    <p id="setup-text">先添加你的工作：工资、发薪日、几点上班，一次填好，首页就能打卡、算钱了。</p>
+    <div class="setup-actions"><button class="primary-small" data-open="newjob" id="setup-jobs">＋ 添加工作</button><button class="text-button" type="button" id="setup-demo">先看看示例（载入一份示例数据）</button></div>
+  </div>
+  <div class="money-card" id="money-card">
+    <p class="money-label" id="money-label">待发工资</p>
+    <div class="money-row" aria-hidden="true"><span class="money-currency">$</span><span class="odometer" id="money-odo"></span></div>
+    <p class="sr-only" id="money-sr"></p>
+    <div class="money-foot"><span id="flow-label">今天已赚</span><strong class="odometer flow-odo" id="flow-amount"></strong></div>
+  </div>
+  <div class="reminders" id="reminders"></div>
+  <div class="today-shifts" id="today-shifts"></div>
+  <button id="checkin" class="checkin"><span id="checkin-icon"></span><span id="checkin-label">今天上班了</span></button>
+  <p class="checkin-sub" id="checkin-sub"></p>
+  <div class="home-extras"><button id="undo" class="small-link undo" hidden>撤销这次打卡</button></div>
+  <p class="inline-state" id="home-note" role="status" hidden></p>
+</section>
+
+<section id="calendar" class="view cal-view" hidden>
+  <h1 class="sr-only">日历</h1>
+  <div class="calendar-card" id="calendar-card">
+    <div class="cal-top"><div class="calendar-modes" aria-label="日历显示方式"><button id="mode-year" aria-pressed="false" aria-controls="year-grid">年</button><button id="mode-month" aria-pressed="true" aria-controls="dates">月</button><button id="mode-week" aria-pressed="false" aria-controls="dates">周</button></div><button class="calendar-today" id="calendar-today">今天</button></div>
+    <div class="month-row"><button class="month-title" id="month-title" aria-label="查看全年日历"></button></div>
+    <p class="calendar-range" id="calendar-range"></p>
+    <div id="year-overview" hidden><div class="calendar-pager year-pager" id="year-pager"></div></div><div class="weekdays" aria-hidden="true"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div><div class="date-viewport" id="date-viewport"><div class="calendar-pager month-pager" id="month-pager"></div><div class="calendar-pager week-pager" id="week-pager" hidden></div></div>
+    <div class="legend" hidden></div><button class="calendar-grip" id="calendar-grip" aria-expanded="true" aria-controls="date-viewport"><span class="grip-bar" aria-hidden="true"></span><span class="sr-only" id="grip-label">上滑收起月历</span></button></div>
+  <div class="day-card" id="day-card">
+    <div class="day-head"><span class="tiny-label" id="selected-date"></span><span class="badge" id="shift-badge"></span></div>
+    <h2 id="shift-title"></h2>
+    <p class="holiday-note" id="day-holiday" hidden></p>
+    <div class="day-shifts" id="day-shifts"></div>
+    <dl class="kv" id="day-kv"><div><dt id="dt-plan">排班</dt><dd id="day-plan"></dd></div><div><dt id="dt-actual">实际</dt><dd id="day-actual"></dd></div><div><dt id="dt-pay">当天工资</dt><dd id="day-pay"></dd></div></dl>
+    <p class="payday-note" id="day-payday" hidden></p>
+    <div class="day-actions"><button class="soft-button" id="leave">这天放假</button><button class="soft-button" id="day-add-open" aria-expanded="false" aria-controls="day-add">＋ 加一条</button></div>
+    <div class="day-add" id="day-add" hidden>
+      <form class="da-ot" id="da-ot"><label class="field" id="da-job-field"><span>哪份工作</span><select id="da-job"></select></label><div class="da-line"><label class="field"><span>记加班（小时）</span><input id="da-hours" inputmode="decimal" placeholder="例如 2 或 1.5，休息日也能记"></label><button class="primary-small" type="submit">记下</button></div></form>
+      <button class="da-link" type="button" id="day-more"><span><strong>多上一段班 / 改这天的班</strong><small>只改这一天：加一段、换时间、改成半天</small></span><span data-icon="right"></span></button>
+    </div>
+    <p class="field-hint day-hint" id="day-hint" hidden>点某一天，可以补记、设成放假或单独改班。</p>
+    <p class="inline-state" id="day-note" role="status" hidden></p>
+  </div>
+  <button class="undo-bar" id="undo-bar" hidden></button>
+</section>
+
+<section id="pay" class="view" hidden>
+  <div class="page-heading"><h1>工资</h1><p>把每一天的付出，慢慢攒起来。</p></div>
+  <div class="pay-hero"><p id="pay-hero-label">本月预计工资</p><div class="amount" id="pay-amount">—</div><div class="muted-line" id="pay-hero-note"></div></div>
+  <p class="inline-state warn" id="pay-warn" hidden></p>
+  <div id="pay-jobs" class="list"></div>
+  <button class="page-link" id="pay-import" type="button" aria-expanded="false"><span class="row-leading"><span class="row-icon" data-icon="file"></span><span class="row-title">识别工资单 / 发薪日历<span class="row-note">选 PDF 或照片，自动读出发薪日</span></span></span><span data-icon="right"></span></button>
+  <div class="pay-import-jobs" id="pay-import-jobs" hidden></div>
+  <button class="page-link" data-open="history"><span class="row-leading"><span class="row-icon" data-icon="clock"></span><span class="row-title">历史账单<span class="row-note">每一期的预计工资和实际到账</span></span></span><span data-icon="right"></span></button>
+  <button class="page-link" data-open="jobs"><span class="row-leading"><span class="row-icon" data-icon="briefcase"></span><span class="row-title">我的工作<span class="row-note">工资、发薪日、几点上班</span></span></span><span data-icon="right"></span></button>
+</section>
+
+<section id="settings" class="view" hidden>
+  <div class="page-heading"><h1>设置</h1><p>按你的工作方式，安排就好。</p></div>
+  <p class="section-title">工作与收入</p>
+  <button class="page-link" data-open="jobs"><span class="row-leading"><span class="row-icon" data-icon="briefcase"></span><span class="row-title">我的工作<span class="row-note" id="settings-job-note">工资、发薪日、几点上班</span></span></span><span data-icon="right"></span></button>
+    <p class="section-title">记录与数据</p>
+  <button class="page-link" data-open="options"><span class="row-leading"><span class="row-icon" data-icon="sliders"></span><span class="row-title">记录选项<span class="row-note">按需开启更多记录方式</span></span></span><span data-icon="right"></span></button>
+  <button class="page-link" data-open="backup"><span class="row-leading"><span class="row-icon" data-icon="upload"></span><span class="row-title">备份与恢复<span class="row-note">考勤、工资单、头像一起备份</span></span></span><span data-icon="right"></span></button>
+  <p class="section-title">我</p>
+  <button class="page-link" data-open="profile"><span class="row-leading"><span class="row-icon" data-icon="user"></span><span class="row-title">头像和名字<span class="row-note">首页右上角显示的那个</span></span></span><span data-icon="right"></span></button>
+  <p class="settings-foot">班记 · 数据只保存在这台设备的浏览器里，记得定期备份。</p>
+</section>
+
+<section id="jobs" class="view" hidden>
+  <button class="back" data-back><span data-icon="left"></span>返回</button><div class="page-heading"><h1>我的工作</h1><p>做几份工作就加几张卡。工资、发薪日、几点上班都在卡里，点开就能改。</p></div>
+  <div id="job-list" class="list"></div>
+  <button class="add-job" type="button" data-open="newjob"><span aria-hidden="true">＋</span>添加工作</button>
+</section>
+
+<section id="newjob" class="view" hidden>
+  <button class="back" data-back><span data-icon="left"></span>返回</button><div class="page-heading"><h1>添加工作</h1><p id="nj-progress">第 1 步，共 4 步</p></div>
+  <div class="nj-dots" id="nj-dots" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <div class="form-card" data-step="1">
+    <p class="form-title">这份工作叫什么？</p>
+    <label class="field"><span>公司或店名</span><input id="nj-name" maxlength="20" placeholder="例如：超市、晚上的餐厅" autocomplete="off"></label>
+  </div>
+  <div class="form-card" data-step="2" hidden>
+    <p class="form-title">工资怎么算？</p>
+    <div class="segment" id="nj-mode"><button type="button" data-v="daily" aria-pressed="true">按天算</button><button type="button" data-v="hourly" aria-pressed="false">按小时算</button></div>
+    <label class="field"><span id="nj-rate-label">一天多少钱（美元）</span><input id="nj-rate" inputmode="decimal" placeholder="例如 150"></label>
+    <label class="field"><span>加班一小时多少钱（美元，没有就空着）</span><input id="nj-ot" inputmode="decimal" placeholder="0"></label>
+    <label class="field"><span>一天正班几小时</span><input id="nj-hours" inputmode="decimal" value="8"></label>
+    <p class="field-hint" id="nj-rate-hint"></p>
+  </div>
+  <div class="form-card" data-step="3" hidden>
+    <p class="form-title">什么时候发工资？</p>
+    <div id="nj-cycle-slot"></div>
+  </div>
+  <div class="form-card" data-step="4" hidden>
+    <p class="form-title">平时几点上班？</p>
+    <div class="time-row"><label class="time-part"><span>上班</span><input id="nj-start" type="time" value="09:00"></label><span>—</span><label class="time-part"><span>下班</span><input id="nj-end" type="time" value="17:00"></label></div>
+    <label class="field"><span>每周哪几天</span></label><div class="week-repeat" id="nj-days"></div>
+    <label class="field"><span>中间休息几分钟（不算工资，没有填 0）</span><input id="nj-break" inputmode="numeric" value="0"></label>
+    <label class="field"><span>班次名字（选填）</span><input id="nj-sname" maxlength="20" placeholder="例如：早班；不填就叫「上班」"></label>
+    <p class="field-hint">从今天开始自动排进日历。哪天放假或临时改时间，到日历里点那一天。</p>
+  </div>
+  <p class="inline-state" id="nj-note" role="status" hidden></p>
+  <div class="nj-actions"><button class="soft-button" type="button" id="nj-prev">上一步</button><button class="primary-small" type="button" id="nj-next">下一步</button></div>
+  <button class="text-button" type="button" id="nj-skip">这一步先跳过，以后再填</button>
+</section>
+
+<section id="job" class="view" hidden>
+  <button class="back" data-back><span data-icon="left"></span>返回</button><div class="page-heading"><h1 id="job-title">工作</h1><p>点哪一项就改哪一项。</p></div>
+  <p class="inline-state" id="job-note" role="status" hidden></p>
+  <div class="job-card-full">
+    <div class="job-sec" id="sec-rate"><button class="sec-head" type="button" aria-expanded="false" data-sec="rate"><span class="sec-text"><span class="sec-title">工资</span><span class="sec-sum" id="sum-rate"></span></span><span class="sec-go" aria-hidden="true">修改</span></button><div class="sec-body" hidden>
+      <form id="rate-form">
+          <div id="rule-list" class="list"></div>
+          <p class="form-label" id="rate-form-title">填写工资</p>
+          <div class="segment" id="rate-mode"><button type="button" data-v="daily" aria-pressed="true">按天算</button><button type="button" data-v="hourly" aria-pressed="false">按小时算</button></div>
+          <label class="field"><span id="rate-label">一天多少钱（美元）</span><input id="rf-rate" inputmode="decimal" placeholder="例如 150" required></label>
+          <label class="field"><span>加班一小时多少钱（美元，没有填 0）</span><input id="rf-ot" inputmode="decimal" placeholder="0"></label>
+          <label class="field"><span>一天正班几小时</span><input id="rf-hours" inputmode="decimal" value="8" required></label>
+          <label class="field"><span>从哪天开始按这个算</span><input id="rf-effective" type="date" required></label>
+          <button class="primary-small" type="submit" id="rf-submit">保存工资</button>
+          <button class="text-button" type="button" id="rf-cancel" hidden>取消修改</button>
+          <p class="inline-state" id="rf-note" role="status" hidden></p>
+        </form>
+    </div></div>
+    <div class="job-sec" id="sec-cycle"><button class="sec-head" type="button" aria-expanded="false" data-sec="cycle"><span class="sec-text"><span class="sec-title">发薪日</span><span class="sec-sum" id="sum-cycle"></span></span><span class="sec-go" aria-hidden="true">修改</span></button><div class="sec-body" hidden>
+      <form id="cycle-form"><div id="cycle-fields">
+    <p class="form-label">多久发一次？</p>
+    <div class="segment wrap" id="cycle-kind"><button type="button" data-v="monthly">每月一次</button><button type="button" data-v="biweekly">两周一次</button><button type="button" data-v="weekly">每周一次</button><button type="button" data-v="none">先不设</button></div>
+    <div id="cycle-monthly">
+      <label class="field"><span>每月几号发？</span><input id="cf-payday" inputmode="numeric" value="10"></label>
+      <p class="form-label">这天发的，是哪段时间的工资？</p>
+      <div class="segment wrap" id="cf-which"><button type="button" data-v="last">上个月 1 号到月底</button><button type="button" data-v="this">这个月 1 号到月底</button><button type="button" data-v="custom">别的算法</button></div>
+      <div id="cf-custom" hidden>
+        <label class="field"><span>每段从每月几号算起（1–28）</span><input id="cf-startday" inputmode="numeric" value="26"></label>
+        <label class="field"><span>工资在这一段结束后的哪个月发</span><select id="cf-offset"><option value="0">同一个月</option><option value="1" selected>下个月</option><option value="2">再下个月</option></select></label>
+      </div>
+    </div>
+    <div id="cycle-weekly" hidden>
+      <label class="field"><span>最近一次发工资是哪天？</span><input id="cf-lastpay" type="date"></label>
+      <label class="field"><span>那次发的钱，算到哪天为止？</span><input id="cf-lastend" type="date"></label>
+    </div>
+    <label class="field" id="cf-weekend-field"><span>发薪日碰上周末</span><select id="cf-weekend"><option value="none">照常</option><option value="before">提前到周五</option><option value="after">推后到周一</option></select></label>
+    <div class="cycle-preview" id="cycle-preview"></div></div>
+        <button class="primary-small" type="submit">保存发薪日</button>
+        <p class="inline-state" id="cf-note" role="status" hidden></p>
+      </form>
+    </div></div>
+    <div class="job-sec" id="sec-shift"><button class="sec-head" type="button" aria-expanded="false" data-sec="shift"><span class="sec-text"><span class="sec-title">上班时间</span><span class="sec-sum" id="sum-shift"></span></span><span class="sec-go" aria-hidden="true">修改</span></button><div class="sec-body" hidden>
+      <div id="shift-list" class="list"></div>
+  <button class="add-job small" type="button" id="sf-open" hidden><span aria-hidden="true">＋</span>再加一个班次</button>
+  <form id="shift-form">
+    <p class="form-label" id="shift-form-title">再加一个班次</p>
+    <label class="field"><span>班次名称</span><input id="sf-name" maxlength="20" placeholder="例如：早班" required></label>
+    <div class="time-row"><label class="time-part"><span>上班</span><input id="sf-start" type="time" value="09:00" required></label><span>—</span><label class="time-part"><span>下班</span><input id="sf-end" type="time" value="18:00" required></label></div>
+    <label class="field"><span>中间休息（分钟，不计工资）</span><input id="sf-break" inputmode="numeric" value="60"></label>
+    <label class="field"><span>每周重复</span></label><div class="week-repeat" id="repeat-days"></div>
+    <label class="field"><span>从哪天开始</span><input id="sf-from" type="date" required></label>
+    <p class="field-hint">打卡在这段班的时间里开放：上班前 1 小时到下班。某一天放假或改班，到日历里点那天单独调整。</p>
+    <button class="primary-small" type="submit" id="sf-submit">保存班次</button>
+    <button class="text-button" type="button" id="sf-cancel" hidden>取消</button>
+  </form>
+  <p class="inline-state" id="sf-note" role="status" hidden></p>
+    </div></div>
+    <div class="job-sec" id="sec-import"><button class="sec-head" type="button" aria-expanded="false" data-sec="import"><span class="sec-text"><span class="sec-title">导入发薪安排</span><span class="sec-sum" id="sum-import"></span></span><span class="sec-go" aria-hidden="true">修改</span></button><div class="sec-body" hidden>
+      <p class="field-hint">选公司给的<b>发薪日历</b>或<b>工资单</b> PDF（文字版、扫描版都行），也可以直接选一张<b>照片或截图</b>、JSON，或者粘贴文字。中英文工资单都认。识别出来先给你核对，确认后才保存到这份工作里。</p>
+    <label class="upload-area"><span data-icon="upload"></span><strong>选择 PDF、照片或 JSON</strong><small>文件只在这台手机上读，不会上传<br>PDF 最多 30 页，扫描页最多 5 页；照片请拍正、拍清楚</small><input id="import-file" type="file" accept="application/pdf,.pdf,image/*,application/json,.json"></label>
+    <details class="paste-box" id="import-paste"><summary>没有文件？粘贴文字识别</summary><label class="field"><span>把发薪日历或工资单上的文字粘贴到这里</span><textarea id="import-text" rows="5" placeholder="例如：&#10;Pay Period  Start  End  Pay Date&#10;1  12/29/2025  01/11/2026  01/18/2026"></textarea></label><button class="soft-button" type="button" id="import-parse">识别这段文字</button></details>
+    <p class="import-status" id="import-status" role="status" hidden></p>
+    <div id="import-preview" hidden></div>
+    <p class="inline-state" id="import-note" role="status" hidden></p>
+    <div id="schedule-list" class="list"></div>
+  
+    </div></div>
+    <div class="job-sec" id="sec-name"><button class="sec-head" type="button" aria-expanded="false" data-sec="name"><span class="sec-text"><span class="sec-title">名字</span><span class="sec-sum" id="sum-name"></span></span><span class="sec-go" aria-hidden="true">修改</span></button><div class="sec-body" hidden>
+      <form id="job-name-form">
+        <label class="field"><span>公司或店名</span><input id="jn-name" maxlength="20" required></label>
+        <div class="item-actions"><button class="primary-small" type="submit">保存名字</button><button class="soft-button" type="button" id="job-delete">删除这份工作</button></div>
+        <p class="inline-state" id="jn-note" role="status" hidden></p>
+      </form>
+    </div></div>
+  </div>
+</section>
+
+
+<section id="day" class="view" hidden>
+  <button class="back" data-back><span data-icon="left"></span>返回</button><div class="page-heading"><h1 id="dayedit-title">调整这一天</h1><p>只改这一天，之后的重复班次保持原样。</p></div>
+  <form class="form-card" id="dayedit-form">
+    <p class="form-label">这天的排班</p>
+    <div class="segment" id="de-plan-seg"><button type="button" data-v="repeat">按重复班次</button><button type="button" data-v="off">这天放假</button><button type="button" data-v="shifts">单独排班</button></div>
+    <p class="field-hint" id="de-repeat-hint"></p>
+    <div id="de-shift-rows" hidden></div>
+    <button class="text-button" type="button" id="de-add-shift" hidden>＋ 再加一段班</button>
+    <p class="form-label">这天实际</p>
+    <label class="switch-row"><span>这天休息<small>记了休息，这天就不算上班和加班</small></span><input type="checkbox" id="de-rest"></label>
+    <div id="de-entry-rows"></div>
+    <button class="primary-small" type="submit">保存这一天</button>
+    <p class="inline-state" id="de-note" role="status" hidden></p>
+  </form>
+</section>
+
+<section id="history" class="view" hidden>
+  <button class="back" data-back><span data-icon="left"></span>返回</button><div class="page-heading"><h1>历史账单</h1><p>每一期的预计工资；到账后记一笔，看看差了多少。</p></div>
+  <div class="year-card" id="year-card"></div>
+  <div id="bill-list" class="list"></div>
+</section>
+
+<section id="options" class="view" hidden>
+  <button class="back" data-back><span data-icon="left"></span>返回</button><div class="page-heading"><h1>记录选项</h1><p>需要什么，再打开什么。首页依然只需轻轻一点。</p></div>
+  <div class="form-card">
+    <label class="switch-row"><span>排班的日子自动打卡<small>到上班时间自动记成上班；请假到日历里点那天，按「请假」取消</small></span><input type="checkbox" id="opt-autoClock"></label>
+    <label class="switch-row"><span>记录半天班<small>调整某一天时多一个「半天」</small></span><input type="checkbox" id="opt-halfDay"></label>
+    <label class="switch-row"><span>自定义单日工时<small>调整某一天时可以改正班小时数</small></span><input type="checkbox" id="opt-customHours"></label>
+    <label class="switch-row"><span>记录加班<small>调整某一天时可以填加班小时</small></span><input type="checkbox" id="opt-overtime"></label>
+    <label class="switch-row"><span>日历显示美国法定节日<small>只是标出来，不会自动放假或改工资</small></span><input type="checkbox" id="opt-holidays"></label>
+    <label class="switch-row"><span>首页金额显示 4 位小数<small>小数点后多两位，数字跳得更明显；默认 2 位</small></span><input type="checkbox" id="opt-fine"></label>
+    <p class="inline-state" id="opt-note" role="status" hidden></p>
+  </div>
+</section>
+
+<section id="backup" class="view" hidden>
+  <button class="back" data-back><span data-icon="left"></span>返回</button><div class="page-heading"><h1>备份与恢复</h1><p>考勤记录、PDF 工资单和头像会放进同一个备份。</p></div>
+  <div class="form-card"><p class="form-title">导出备份</p><p class="field-hint">换手机、清理浏览器之前，先导出一份。</p><button class="primary-small" id="backup-export">导出完整备份</button><p class="inline-state" id="backup-note" role="status" hidden></p><div id="backup-out" class="backup-out" hidden><label class="field"><span id="backup-out-label">备份内容</span><textarea id="backup-text" rows="5" readonly></textarea></label><button class="soft-button strong" type="button" id="backup-copy">复制备份内容</button></div></div>
+  <div class="form-card spaced"><p class="form-title">从备份恢复</p><label class="upload-area"><span data-icon="upload"></span><strong>选择备份文件</strong><small>恢复会替换这台设备上现在的数据<br>选好后会先给你看内容</small><input id="restore-file" type="file" accept="application/json,.json"></label><label class="field paste-field"><span>或者把备份内容粘贴到这里</span><textarea id="restore-text" rows="4" placeholder="粘贴之前复制的备份内容"></textarea></label><button class="soft-button" type="button" id="restore-paste">检查粘贴的内容</button><div id="restore-preview" hidden></div><p class="inline-state" id="restore-note" role="status" hidden></p></div>
+  <div class="form-card spaced"><p class="form-title">示例数据</p><p class="field-hint" id="demo-hint">想先看看每个功能长什么样，可以载入一份示例：两份工作、两个多月的记录（加班、半天、放假、漏记、已到账和待记到账都有）。你现在的数据会先存起来，随时可以换回来。</p><button class="soft-button strong" type="button" id="demo-load">载入示例数据</button> <button class="soft-button" type="button" id="demo-clear" hidden>清除示例，换回我原来的数据</button><p class="inline-state" id="demo-note" role="status" hidden></p></div>
+</section>
+
+<section id="profile" class="view" hidden>
+  <button class="back" data-back><span data-icon="left"></span>返回</button><div class="page-heading"><h1>个人资料</h1><p>头像和昵称只存在这台设备上，会一起放进备份。</p></div>
+  <div class="form-card profile-card">
+    <div class="avatar-preview"><span class="avatar big" id="pf-avatar"></span></div>
+    <div class="segment" id="pf-kind"><button type="button" data-v="animal">卡通小动物</button><button type="button" data-v="image">用自己的图片</button></div>
+    <div id="pf-animal-fields"><p class="form-label">选一只</p><div class="animal-grid" id="pf-animals"></div><p class="form-label">底色</p><div class="color-row" id="pf-colors"></div></div>
+    <div id="pf-image-fields" hidden><label class="upload-area"><span data-icon="upload"></span><strong>选择一张图片</strong><small>会自动裁成正方形并压缩<br>比如你用 AI 生成的卡通头像</small><input id="pf-file" type="file" accept="image/png,image/jpeg,image/webp"></label></div>
+    <label class="field"><span>昵称</span><input id="pf-nickname" maxlength="20" placeholder="首页会用它跟你打招呼"></label>
+    <button class="primary-small" type="button" id="pf-save">保存</button>
+    <p class="inline-state" id="pf-note" role="status" hidden></p>
+  </div>
+</section>
+
+</main>
+<nav class="bottom-nav" aria-label="主导航"><button class="nav-item" data-page="home" aria-current="page"><span class="nav-icon" data-icon="home"></span>首页</button><button class="nav-item" data-page="calendar"><span class="nav-icon" data-icon="calendar"></span>日历</button><button class="nav-item" data-page="pay"><span class="nav-icon" data-icon="wallet"></span>工资</button><button class="nav-item" data-page="settings"><span class="nav-icon" data-icon="settings"></span>设置</button></nav>
+</div>
+<script src="app.js?v=62be305706" defer></script>
+<script type="module" src="boot.js?v=62be305706"></script>
+</body>
+</html>
