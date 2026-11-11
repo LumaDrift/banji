@@ -12,7 +12,7 @@
 //
 // 每个周期：{ jobId, start, end, payday, source:'imported'|'rule', period? } 起止都包含当天。
 
-import {validDate, addDays, daysBetween, weekdayOf, makeDate} from './dates.js?v=62be305706';
+import {validDate, addDays, daysBetween, weekdayOf, makeDate} from './dates.js?v=89b9af5a97';
 
 const fail = m => { throw new Error(m); };
 const int = (v, min, max) => Number.isSafeInteger(v) && v >= min && v <= max;

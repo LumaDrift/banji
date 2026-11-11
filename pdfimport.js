@@ -1,8 +1,8 @@
 // 把原来「工资单与发薪日历识别」页的读取流程接到 App 里。识别规则（payroll/parser.mjs）和本机 OCR（payroll/ocr.mjs）原样复用；
 // 这里只负责：读 PDF → 每页取文字（扫描页自动 OCR）→ 判断是发薪日历还是单份工资单 → 交给界面核对。文件不会上传。
-import {textFromItems, parsePayslip, parsePayrollCalendar} from './payroll/parser.mjs?v=62be305706';
-import {recognizePage, removeTableRules} from './payroll/ocr.mjs?v=62be305706';
-import {englishPayslip} from './payslip-en.js?v=62be305706';
+import {textFromItems, parsePayslip, parsePayrollCalendar} from './payroll/parser.mjs?v=89b9af5a97';
+import {recognizePage, removeTableRules} from './payroll/ocr.mjs?v=89b9af5a97';
+import {englishPayslip} from './payslip-en.js?v=89b9af5a97';
 
 let pdfModule = null;
 

@@ -11,13 +11,13 @@
 //   - 打卡只在这段班的时间段里开放：上班前 60 分钟到下班。错过了在日历里补记。
 // 版本 1、2 的数据读入时自动升级：原来的一切归到一家「我的工作」下，记录不丢、不改金额。
 
-import {validDate, validTime, timeToMinutes} from './dates.js?v=62be305706';
-import {planFor, validatePlans, validId, shiftKey, shiftWindow} from './plan.js?v=62be305706';
-import {validatePayCycle, periodKey} from './periods.js?v=62be305706';
+import {validDate, validTime, timeToMinutes} from './dates.js?v=89b9af5a97';
+import {planFor, validatePlans, validId, shiftKey, shiftWindow} from './plan.js?v=89b9af5a97';
+import {validatePayCycle, periodKey} from './periods.js?v=89b9af5a97';
 
-export {validDate} from './dates.js?v=62be305706';
-export {planFor, hasShift, addShiftPlan, updateShiftPlan, removeShiftPlan, endShiftPlan, setDayPlan, shiftKey, shiftWindow} from './plan.js?v=62be305706';
-export {periodFor, periodsBetween, paydaysBetween, nextPayday, periodKey, cyclePeriodFor} from './periods.js?v=62be305706';
+export {validDate} from './dates.js?v=89b9af5a97';
+export {planFor, hasShift, addShiftPlan, updateShiftPlan, removeShiftPlan, endShiftPlan, setDayPlan, shiftKey, shiftWindow} from './plan.js?v=89b9af5a97';
+export {periodFor, periodsBetween, paydaysBetween, nextPayday, periodKey, cyclePeriodFor} from './periods.js?v=89b9af5a97';
 
 export const VERSION = 3;
 export const OPEN_BEFORE_MINUTES = 60;

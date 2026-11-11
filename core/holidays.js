@@ -5,7 +5,7 @@
 //   name 全名（如「感恩节」），short 日历格子里用的短名（最多 4 个字），observed=true 表示这天是补休日。
 // holidayOn(date) → 那一天的节日，或者 null。
 
-import {makeDate, weekdayOf, addDays, validDate} from './dates.js?v=62be305706';
+import {makeDate, weekdayOf, addDays, validDate} from './dates.js?v=89b9af5a97';
 
 /** 某年某月第 n 个星期 wd（0=周日）；n = -1 表示最后一个。 */
 function nthWeekday(year, month, wd, n) {

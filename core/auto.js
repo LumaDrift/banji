@@ -4,9 +4,9 @@
 // state.autoSince           从哪天开始自动记（打开开关那天；之前漏记的日子不会被自动补上，仍然提醒你自己核对）
 //
 // 取消某段班用 skipShift：把这段班从「这一天的安排」里拿掉（单日安排），这样自动打卡不会再把它记回来。
-import {addDays, daysBetween, validDate, timeToMinutes} from './dates.js?v=62be305706';
-import {planFor, setDayPlan} from './plan.js?v=62be305706';
-import {entriesOf, matchEntry, recordShift, removeEntry, addOvertime} from './domain.js?v=62be305706';
+import {addDays, daysBetween, validDate, timeToMinutes} from './dates.js?v=89b9af5a97';
+import {planFor, setDayPlan} from './plan.js?v=89b9af5a97';
+import {entriesOf, matchEntry, recordShift, removeEntry, addOvertime} from './domain.js?v=89b9af5a97';
 
 const LOOKBACK = 62; // 最多往回补这么多天（比如很久没打开 App）
 

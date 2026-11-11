@@ -108,6 +108,13 @@ function reloadFromStorage(message) {
   if (message) { $('storage-alert').hidden = false; $('storage-alert').textContent = message; setTimeout(() => { if ($('storage-alert').textContent === message) $('storage-alert').hidden = true; }, 6000); }
 }
 function showStorageAlert(msg) { const el = $('storage-alert'); el.hidden = false; el.textContent = msg + ' 可以到「设置 › 备份与恢复」用备份恢复。'; }
+// 页面不能放大缩小（iPhone 的 Safari 不认 user-scalable=no，要拦手势）。日历的双指缩放用的是 touch 事件，不受影响。
+for (const t of ['gesturestart', 'gesturechange', 'gestureend']) document.addEventListener(t, e => e.preventDefault(), {passive: false, capture: true});
+document.addEventListener('touchstart', e => { if (e.touches.length > 1) e.preventDefault(); }, {passive: false, capture: true});
+document.addEventListener('touchmove', e => { if (e.touches.length > 1 || (e.scale && e.scale !== 1)) e.preventDefault(); }, {passive: false, capture: true});
+// 双击放大由 CSS 的 touch-action: manipulation 关掉（不拦 touchend，免得「再点一次确认」点不动）
+document.addEventListener('wheel', e => { if (e.ctrlKey) e.preventDefault(); }, {passive: false});
+
 // 自动打卡：到了上班时间就把排了班的记成上班（不进撤销列表）。打开 App、每分钟、回到页面时都检查一次。
 const autoOn = () => !!state.settings.autoClock;
 function runAuto({render = true} = {}) {
@@ -496,12 +503,39 @@ $('day-more').onclick = () => { dayEditDate = selected; show('day'); };
 // 「＋ 加一条」：就地展开，记加班或者改这一天的班；换一天就自动收起
 let dayAddFor = null;
 const date0 = () => selected;
+// 常用班次：每周重复的班次 + 以前单独排过的班，去重。加班的时候点一下就套用，不用再输时间。
+function shiftTemplates() {
+  const out = new Map(), ok = new Set(state.jobs.map(j => j.id));
+  const add = x => { if (!ok.has(x.jobId) || !x.start || !x.end) return; const k = `${x.jobId}|${x.start}|${x.end}|${x.breakMinutes || 0}`; if (!out.has(k)) out.set(k, {jobId: x.jobId, name: x.name || '班', start: x.start, end: x.end, breakMinutes: x.breakMinutes || 0}); };
+  for (const p of state.shiftPlans) add(p);
+  for (const d of Object.keys(state.dayPlans).sort().reverse()) if (state.dayPlans[d].type === 'shifts') state.dayPlans[d].shifts.forEach(add);
+  return [...out.values()].slice(0, 8);
+}
+const tplLabel = t => `${state.jobs.length > 1 ? jobName(t.jobId) + ' · ' : ''}${t.name} ${t.start}–${t.end}`;
+/** 给某天加一段常用班：这天的安排 = 原来的班 + 这一段；已经到点（过去的日子，或今天已过上班时间）就同时记成上班。 */
+function addTemplateShift(date, t) {
+  const now = B.planFor(state, date).shifts;
+  if (now.some(x => x.jobId === t.jobId && x.start === t.start)) { say($('day-note'), `${shortDate(date)} 已经有 ${tplLabel(t)} 这段班了。`, 'error'); return; }
+  const due = date < today || (date === today && nowMin() >= toMin(t.start));
+  const shifts = [...now.map(({jobId, name, start, end, breakMinutes}) => ({jobId, name, start, end, breakMinutes})), {...t}];
+  if (act($('day-note'), `${shortDate(date)} 加 ${t.name}`, s => {
+    let n = B.setDayPlan(s, date, {type: 'shifts', shifts});
+    if (due && !B.entriesOf(n, date).some(e => e.status === 'rest')) n = B.recordShift(n, date, `${t.jobId}@${t.start}`);
+    return n;
+  }, `已给 ${shortDate(date)} 加上 ${tplLabel(t)}${due ? '，记成上班了' : ''}。只影响这一天。`)) { dayAddFor = null; syncDayAdd(date); }
+}
+function tplButtons(onPick) {
+  return shiftTemplates().map(t => h('button', {class: 'tpl-chip', type: 'button', onclick: () => onPick(t)}, h('b', {text: '＋ ' + t.name}), h('span', {text: `${state.jobs.length > 1 ? jobName(t.jobId) + ' · ' : ''}${t.start}–${t.end}`})));
+}
 function syncDayAdd(date) {
   const open = dayAddFor === date;
   $('day-add').hidden = !open; $('day-add-open').setAttribute('aria-expanded', String(open)); $('day-add-open').textContent = open ? '收起' : '＋ 加一条';
   if (!open) { dayAddFor = null; return; }
   jobOptions($('da-job'), $('da-job').value || info(date).shifts[0]?.jobId || state.jobs[0]?.id); $('da-job-field').hidden = state.jobs.length < 2;
   $('da-ot').hidden = !state.jobs.length;
+  const tpl = tplButtons(t => addTemplateShift(date, t));
+  $('da-tpl').hidden = !tpl.length;
+  $('da-tpl').replaceChildren(...(tpl.length ? [h('p', {class: 'da-title', text: '加一段班（点一下套用）'}), h('div', {class: 'tpl-list'}, ...tpl)] : []));
   requestAnimationFrame(() => $('day-add').scrollIntoView({block: 'nearest'}));
 }
 $('day-add-open').onclick = () => { dayAddFor = dayAddFor === selected ? null : selected; syncDayAdd(selected); };
@@ -747,6 +781,14 @@ function deMatches() {
 }
 function renderPlanRows() {
   const box = $('de-shift-rows'); box.hidden = dePlan !== 'shifts'; $('de-add-shift').hidden = dePlan !== 'shifts' || deRows.length >= 6;
+  const tpl = dePlan === 'shifts' && deRows.length < 6 ? tplButtons(t => {
+    if (deRows.some(r => r.jobId === t.jobId && r.start === t.start)) { say($('de-note'), '这段班已经在上面了。', 'error'); return; }
+    const blank = deRows.length === 1 && deRows[0].name === '临时上班' && deRows[0].start === '09:00' && deRows[0].end === '18:00';
+    if (blank) deRows.length = 0;
+    deRows.push({...t}); say($('de-note'), ''); renderPlanRows(); renderEntryRows();
+  }) : [];
+  $('de-tpl').hidden = !tpl.length;
+  $('de-tpl').replaceChildren(...(tpl.length ? [h('p', {class: 'form-label', text: '套用常用班次'}), h('div', {class: 'tpl-list'}, ...tpl)] : []));
   if (dePlan !== 'shifts') { box.replaceChildren(); return; }
   box.replaceChildren(...deRows.map((r, i) => {
     const sel = h('select', {onchange: e => { r.jobId = e.target.value; renderEntryRows(); }}); jobOptions(sel, r.jobId);
@@ -1076,7 +1118,7 @@ $('cycle-form').onsubmit = ev => {
 let pendingImport = null, pdfLib = null, importBusy = false;
 const importStatus = t => say($('import-status'), t);
 function resetImport() { pendingImport = null; $('import-preview').hidden = true; $('import-preview').replaceChildren(); importStatus(''); say($('import-note'), ''); }
-async function loadPdfLib() { pdfLib ||= await import('./pdfimport.js?v=62be305706'); return pdfLib; }
+async function loadPdfLib() { pdfLib ||= await import('./pdfimport.js?v=89b9af5a97'); return pdfLib; }
 const sameSchedule = (a, b) => a.start === b.start && a.end === b.end && a.payday === b.payday;
 $('import-file').onchange = async ev => {
   const file = ev.target.files[0]; ev.target.value = ''; if (!file || importBusy) return;

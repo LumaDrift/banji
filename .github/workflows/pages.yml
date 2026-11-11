@@ -26,7 +26,7 @@ jobs:
       - name: Prepare website files
         run: |
           mkdir _site
-          cp index.html *.js *.css _site/
+          cp index.html *.js *.css manifest.webmanifest favicon.ico apple-touch-icon*.png _site/
           cp -R assets core payroll _site/
           cp .nojekyll _site/
       - uses: actions/upload-pages-artifact@v3

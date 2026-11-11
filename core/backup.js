@@ -3,9 +3,9 @@
 // 恢复是用户明确操作：先 parseBackup + describeBackup 给用户看清楚，确认后再 restoreBackup。
 // 恢复后请重新创建 LocalRepository 并 load（旧实例记着恢复前的内容，会拒绝保存）。
 
-import {validateState, emptyState} from './domain.js?v=62be305706';
-import {STORAGE_KEY} from './storage.js?v=62be305706';
-import {PROFILE_KEY, validateProfile} from './profile.js?v=62be305706';
+import {validateState, emptyState} from './domain.js?v=89b9af5a97';
+import {STORAGE_KEY} from './storage.js?v=89b9af5a97';
+import {PROFILE_KEY, validateProfile} from './profile.js?v=89b9af5a97';
 
 export const PAYSLIP_KEY = 'banji-payslips-v1';
 export const BACKUP_FORMAT = 'banji-backup';

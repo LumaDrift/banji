@@ -1,14 +1,22 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#f4f7f5"><meta name="description" content="班记：记上班、看排班、算工资。">
 <title>班记</title>
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="班记">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='16' fill='%2312805f'/%3E%3Ctext x='24' y='33' fill='%23fff' text-anchor='middle' font-size='29'%3E班%3C/text%3E%3C/svg%3E">
-<link rel="stylesheet" href="base.css?v=62be305706">
+<link rel="icon" type="image/png" sizes="48x48" href="./assets/app-icon-48.png?v=89b9af5a97-r8">
+<link rel="shortcut icon" href="./favicon.ico?v=89b9af5a97-r8">
+<link rel="apple-touch-icon" href="./assets/banji-home-89b9af5a97-r8.png">
+<link rel="apple-touch-icon-precomposed" href="./assets/banji-home-89b9af5a97-r8.png">
+<link rel="manifest" href="./manifest.webmanifest?v=89b9af5a97-r8">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="application-name" content="班记">
+<meta name="banji-build" content="89b9af5a97-r8">
+<link rel="stylesheet" href="base.css?v=89b9af5a97">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&amp;family=Noto+Sans+SC:wght@400;500;700&amp;display=swap">
-<link rel="stylesheet" href="theme-mint.css?v=62be305706">
+<link rel="stylesheet" href="theme-mint.css?v=89b9af5a97">
 </head>
 <body>
 <div class="app is-home" lang="zh-CN">
@@ -55,6 +63,7 @@
     <p class="payday-note" id="day-payday" hidden></p>
     <div class="day-actions"><button class="soft-button" id="leave">这天放假</button><button class="soft-button" id="day-add-open" aria-expanded="false" aria-controls="day-add">＋ 加一条</button></div>
     <div class="day-add" id="day-add" hidden>
+      <div class="da-tpl" id="da-tpl"></div>
       <form class="da-ot" id="da-ot"><label class="field" id="da-job-field"><span>哪份工作</span><select id="da-job"></select></label><div class="da-line"><label class="field"><span>记加班（小时）</span><input id="da-hours" inputmode="decimal" placeholder="例如 2 或 1.5，休息日也能记"></label><button class="primary-small" type="submit">记下</button></div></form>
       <button class="da-link" type="button" id="day-more"><span><strong>多上一段班 / 改这天的班</strong><small>只改这一天：加一段、换时间、改成半天</small></span><span data-icon="right"></span></button>
     </div>
@@ -210,7 +219,8 @@
     <div class="segment" id="de-plan-seg"><button type="button" data-v="repeat">按重复班次</button><button type="button" data-v="off">这天放假</button><button type="button" data-v="shifts">单独排班</button></div>
     <p class="field-hint" id="de-repeat-hint"></p>
     <div id="de-shift-rows" hidden></div>
-    <button class="text-button" type="button" id="de-add-shift" hidden>＋ 再加一段班</button>
+    <div class="da-tpl" id="de-tpl" hidden></div>
+    <button class="text-button" type="button" id="de-add-shift" hidden>＋ 自己填一段班</button>
     <p class="form-label">这天实际</p>
     <label class="switch-row"><span>这天休息<small>记了休息，这天就不算上班和加班</small></span><input type="checkbox" id="de-rest"></label>
     <div id="de-entry-rows"></div>
@@ -261,7 +271,7 @@
 </main>
 <nav class="bottom-nav" aria-label="主导航"><button class="nav-item" data-page="home" aria-current="page"><span class="nav-icon" data-icon="home"></span>首页</button><button class="nav-item" data-page="calendar"><span class="nav-icon" data-icon="calendar"></span>日历</button><button class="nav-item" data-page="pay"><span class="nav-icon" data-icon="wallet"></span>工资</button><button class="nav-item" data-page="settings"><span class="nav-icon" data-icon="settings"></span>设置</button></nav>
 </div>
-<script src="app.js?v=62be305706" defer></script>
-<script type="module" src="boot.js?v=62be305706"></script>
+<script src="app.js?v=89b9af5a97" defer></script>
+<script type="module" src="boot.js?v=89b9af5a97"></script>
 </body>
 </html>

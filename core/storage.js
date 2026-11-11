@@ -1,4 +1,4 @@
-import {emptyState,validateState} from './domain.js?v=62be305706';
+import {emptyState,validateState} from './domain.js?v=89b9af5a97';
 export const STORAGE_KEY='banji.attendance.v1';
 export class LocalRepository {
   constructor(storage) { this.storage=storage; this.last=null; this.blocked=false; }

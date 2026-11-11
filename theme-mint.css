@@ -367,3 +367,28 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .da-link strong{display:block;font-size:15px}.da-link small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
 .upload-area [data-icon]{display:flex;justify-content:center}
 .pay-import-jobs{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:-4px 0 12px;padding:0 4px}.pay-import-jobs[hidden]{display:none}.pay-import-jobs .field-hint{margin:0 4px 0 0}
+
+/* 常用班次：点一下套用 */
+.da-tpl[hidden]{display:none}.da-tpl .da-title{margin:0 0 8px}#de-tpl{margin:4px 0 6px}
+.tpl-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.tpl-chip{display:flex;flex-direction:column;align-items:flex-start;gap:2px;border:1px solid var(--line);background:var(--mint-2);border-radius:14px;padding:9px 12px;color:inherit;font:inherit;text-align:left;max-width:100%}
+.tpl-chip b{font-size:14.5px;font-weight:700;color:var(--mint-ink)}.tpl-chip span{font-size:12.5px;color:var(--muted);font-family:var(--num)}
+.tpl-chip:active{transform:scale(.97)}
+
+/* 手机上固定页面：不能缩放、不能把整页（连底栏）往下拖、不横向晃 */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;overscroll-behavior:none}
+/* 只允许上下左右滑，不允许双指缩放（touch-action 不会继承，所以每个元素都写上；日历自己的双指切换用 JS，不受影响） */
+html,body,body *{touch-action:pan-x pan-y}
+.bottom-nav,.bottom-nav *{touch-action:none}
+html,body{overscroll-behavior:none;overflow-x:hidden;max-width:100%}
+.bottom-nav{touch-action:none;overscroll-behavior:contain;-webkit-user-select:none;user-select:none}
+*,*::before,*::after{box-sizing:border-box}
+
+/* iPhone 上日期、时间框会撑出格子、内容居中或变成空白小条：统一成和其它输入框一样 */
+input[type=date],input[type=time],input[type=datetime-local],input[type=month]{-webkit-appearance:none;appearance:none;display:block;width:100%;min-width:0;max-width:100%;min-height:46px;line-height:1.2;text-align:left}
+input[type=date]::-webkit-date-and-time-value,input[type=time]::-webkit-date-and-time-value{text-align:left;min-height:1.2em;margin:0}
+input[type=date]::-webkit-datetime-edit,input[type=time]::-webkit-datetime-edit{padding:0}
+.time-part input[type=time]{min-height:34px;text-align:center}.time-part input[type=time]::-webkit-date-and-time-value{text-align:center}
+.ci-row input[type=date],.ci-payslip input[type=date]{min-height:32px}
+select{max-width:100%;min-width:0}
+.field,.time-part,.da-line .field{min-width:0}

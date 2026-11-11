@@ -9,8 +9,8 @@
 //         最近两个工作日超市漏记；过去的发薪期大部分记了实际到账，最近一期留着「待记到账」。
 //   今天：如果现在已经过了上班时间，就当作已经打卡，首页能看到今天已赚在涨。
 
-import {emptyState, addJob, addRule, setPayCycle, addShiftPlan, recordShift, setEntries, addOvertime, setDayPlan, setReceipt, summarize, planFor, periodsBetween} from './domain.js?v=62be305706';
-import {addDays, weekdayOf, makeDate, timeToMinutes, daysBetween} from './dates.js?v=62be305706';
+import {emptyState, addJob, addRule, setPayCycle, addShiftPlan, recordShift, setEntries, addOvertime, setDayPlan, setReceipt, summarize, planFor, periodsBetween} from './domain.js?v=89b9af5a97';
+import {addDays, weekdayOf, makeDate, timeToMinutes, daysBetween} from './dates.js?v=89b9af5a97';
 
 const MART = 'demo-mart', DINER = 'demo-diner';
 const pad = n => String(n).padStart(2, '0');
